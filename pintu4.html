@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>拼图4</title>
+</head>
+<style type="text/css"> 
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	ul,li{
+		list-style: none;
+	}
+	ul{
+		width: 600px;
+		height: 600px;
+		border: 1px solid red;
+		margin: 0 auto;
+		position: relative;
+	}
+	li{
+		width: 297px;
+		height: 297px;
+		position: absolute;
+		background-color: #ccc;
+		overflow: hidden;
+	}
+	img{
+		position: absolute;
+	}
+</style>
+<body>
+<script type="text/javascript"> 
+	window.onload = function(){
+		var btn = document.querySelector("#btn");
+		var ul = document.querySelector("ul");
+		var li = document.querySelectorAll("li");
+		var img = document.querySelectorAll("img");
+
+		//随机函数
+		function rand(){
+			return parseInt(Math.random()*4);
+		}
+
+		//形成新数组函数
+		function changeNum(){
+			var i = 0;
+			var newArray = new Array();
+			while(newArray.length < 4) {
+				//获取随机数num
+				var num = rand();
+				var bool = true;
+				for(var j = 0; j < newArray.length; j++) {
+					if(newArray[j] == num) {
+						bool = false;
+					}
+				}
+				if(bool == true) {
+					newArray.push(num);
+				}
+				i = newArray.length;
+			}
+			console.log("新数组：" + newArray);
+			return newArray;
+		}	
+
+		//为ul中的li和img设置位置
+		var arr = [{left: "3px",top: "3px"},
+					{left: "303px",top: "3px"},
+					{left: "3px",top: "303px"},
+					{left: "303px",top: "303px"}];
+		function createLi(){
+			for(var i = 0; i < li.length; i++){
+				li[i].style.left = arr[i].left;
+				li[i].style.top = arr[i].top;
+				// img = document.createElement("img");
+				// img.src = "img/pintu.jpg";
+				img[i].style.left = "-" + arr[i].left;
+				img[i].style.top = "-" + arr[i].top;
+				// li[i].appendChild(img);
+				// li[i].style.background = "url(img/pintu.jpg) no-repeat"+ (arr[i].left) +(arr[i].top);
+			}
+		}
+		createLi();
+
+		function changeLi(){
+			//获取重新排列的数组
+			var a = changeNum();
+			for(var i = 0; i < li.length; i++){
+				li[i].style.left = arr[a[i]].left;
+				li[i].style.top = arr[a[i]].top;
+			}
+		}
+
+
+		function Game(){
+			console.log("jinruGame	")
+			for(var j = 0; j < 4; j++){
+				li[j].index = j;
+				li[j].onmousedown = function(e){
+						console.log(this.index);
+					console.log("onmousedown")
+					var ev = e || event;
+					var disX = ev.clientX - this.parentNode.offsetLeft;
+					console.log("disX"+disX)
+					var disY = ev.clientY - this.parentNode.offsetTop;
+					console.log("disY"+disY)
+					this.onmousemove = function(e){
+						console.log("onmousemove")
+						console.log(this.index);
+						var ev = e || event;
+						var h = ev.clientY - disX;
+						console.log("hhhhhhhhh"+h)
+						var w = ev.clientX - disY;
+						console.log("wwwwwwwwwwwwwwww"+w)
+						li[this.index].style.left = h + "px";
+						li[this.index].style.top = w + "px";
+						if(h > h + 100){
+							this.style.left = img[this.index+1].offsetLeft;
+							this.style.top = img[this.index+1].offsetTop;
+
+						}
+					}
+					this.onmouseup = function(){
+						console.log("onmouseup")
+						this.onmousemove = null;
+					}
+				}
+				
+			}
+
+			
+		}
+		Game();
+		
+		//开始游戏
+		btn.onclick = function(){
+			changeLi();
+			Game()
+		}
+		//阻止默认事件
+		document.onmousedown = function(e){
+			var ev = e || event;
+			ev.preventDefault();
+		}
+		
+	}
+</script>
+	<input type="button" value="重新开始" id="btn" name="">
+	<ul> 
+		<li>
+			<img src="img/pintu.jpg"/>
+		</li>
+		<li>
+			<img src="img/pintu.jpg"/>
+		</li>
+		<li>
+			<img src="img/pintu.jpg"/>
+		</li>
+		 <li>
+			<img src="img/pintu.jpg"/>
+		</li>
+	</ul>
+</body>
+</html>

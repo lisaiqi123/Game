@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>paoche</title>
+</head>
+<style type="text/css">
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	ul,li{
+		list-style: none;
+	}
+	.box{
+		width: 640px;
+		height: 665px;
+		/*border: 1px solid red;*/
+		position: relative;
+		margin: 0 auto;
+		overflow: hidden;
+	}
+	.right{
+		width: 640px;
+		height: 1004px;
+	}
+	.juan2{
+		width: 640px;
+		height: 4000px;
+		position: absolute;
+		left: 0;
+		top: 0;
+	}
+	.pic2{
+		width: 640px;
+		height: 1004px;
+		display: block;
+	}
+	p{
+		width: 150px;
+		height: 50px;
+		font-size: 30px;
+		position: absolute;
+		top: 5px;
+		left: 10px;
+		color: #fff;
+	}
+	ul{
+		position: absolute;
+		/*border: 1px solid blue;*/
+		top: 0;
+	}
+	ul li{
+		height: 200px;
+		width: 160px;
+		/*border: 1px solid blue;*/
+		position: absolute;
+		left: 10px;
+		top: -40.9px;
+	}
+	.imgCar{
+		height: 200px;
+		width: 160px;
+		/*border: 1px solid red;*/
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	.car{
+		height: 200px;
+		width: 160px;
+		/*border: 1px solid red;*/
+		position: absolute;
+	}
+</style>
+<body>
+	<div class="box">
+		<div class="right">
+			<div class="juan2">
+				<img src="img/ping2_bg.jpg" class="pic2" />
+				<img src="img/ping2_bg.jpg" class="pic2" />
+			</div>
+		</div>
+		<ul></ul>
+		<p>得分：0</p>
+		<audio src="" autoplay></audio>
+		<img src="img/car.png" class="car"/>
+	</div>
+</body>
+<script type="text/javascript">
+	var box = document.querySelector(".box");
+	var right = document.querySelector(".right");
+	var juan2 = document.querySelector(".juan2");
+	var pic2 = document.querySelector(".pic2");
+	var ul = document.querySelector("ul");
+	var p = document.querySelector("p");
+	var audio = document.querySelector("audio");
+	var car = document.querySelector(".car");
+	var newCarIsMove = true;
+
+	var h = document.documentElement.clientHeight;
+	console.log(h);
+	var iTop = -2*pic2.offsetHeight + h;
+	var bgTimer = setInterval(function(){
+		iTop+=3;
+		if(iTop > 0){
+			iTop = -2*pic2.offsetHeight + h;
+		}
+		juan2.style.top = iTop + "px";
+	},10);
+
+	//键盘控制车的位置
+	var timer = null;
+	var carL = (box.offsetWidth - car.offsetWidth)/2;
+	car.style.left = carL + "px";
+	var carT = box.offsetHeight - car.offsetHeight;
+	car.style.top = carT + "px";
+	document.onkeydown = function(e){
+		var ev = e || event;
+		switch(ev.keyCode){
+			case 37:
+				clearInterval(timer);
+				timer = setInterval(function(){
+					carL -= 10;
+					if(carL <= -14.65){
+						carL = -14.65;
+					}
+					car.style.left = carL + "px";
+				},10);
+				break;
+			case 38:
+				clearInterval(timer);
+				timer = setInterval(function(){
+					carT -= 10;
+					if(carT <= 0){
+						carT = 0;
+					}
+					car.style.top = carT + "px";
+				},10);
+				break;
+			case 39:
+				clearInterval(timer);
+				timer = setInterval(function(){
+					carL += 10;
+					if(carL >= box.offsetWidth - car.offsetWidth){
+						carL = box.offsetWidth - car.offsetWidth;
+					}
+					car.style.left = carL + "px";
+				},10);
+				break;
+			case 40:
+				clearInterval(timer);
+				timer = setInterval(function(){
+					carT += 10;
+					if(carT >= box.offsetHeight - car.offsetHeight){
+						carT = box.offsetHeight - car.offsetHeight;
+					}
+					car.style.top = carT + "px";
+				},10);
+				break;
+		}
+	}
+	document.onkeyup = function(){
+		clearInterval(timer);
+	}
+
+	//创建新li
+	var count = 0;
+	var createCarTimer = setInterval(function(){
+		var imgCar = document.createElement("img");
+		imgCar.src = "img/car1.png";
+		imgCar.className = "imgCar";
+		var li = document.createElement("li");
+		li.appendChild(imgCar);
+		ul.appendChild(li);
+		var min = 0;
+		var max = box.offsetWidth - car.offsetWidth;
+		var L = rand(min,max);
+		li.style.left = L + "px";
+		var liT = -li.offsetHeight;
+		li.style.top = liT + "px";
+		//newCar的运动
+		li.bol = true;
+		li.liTimer = setInterval(function(){
+			liT += 2;
+			if(newCarIsMove == false){
+				clearInterval(li.liTimer);
+			}
+			if(liT > h){
+				ul.removeChild(li);
+				clearInterval(li.liTimer);
+			}
+			li.style.top = liT + "px";
+			if(liT >= car.offsetTop + car.offsetHeight){
+				//给加分设置开关
+				if(li.bol){
+					count++;
+					li.bol = false;
+					p.innerHTML = "得分：" + count;
+				}
+			}
+			//获取所有的newCar，判断car跟所有的newCar的碰撞
+			var newCar = document.querySelectorAll("li");
+			for(var i = 0; i < newCar.length; i++){
+				//调用碰撞条件
+				var ind = check(car,newCar[i]);
+				if(ind){
+					newCarIsMove = false;
+					clearInterval(bgTimer);
+					clearInterval(createCarTimer);
+					clearInterval(li.liTimer);
+					clearInterval(timer);
+					alert("您的得分为："+count);
+				}
+			}
+		},10);
+	},3000);
+	//封装碰撞条件
+	function check(car,newCar){
+		console.log("check");
+		var carTop = car.offsetTop + 65;
+		// console.log(carTop)
+		var carLeft = car.offsetLeft + 60;
+		var carRight = carLeft + 60;
+		var carBottom = car.offsetTop + car.offsetHeight;
+		var newCarTop = newCar.offsetTop;
+		var newCarLeft = newCar.offsetLeft + 60;
+		var newCarRight = newCarLeft + 60;
+		var newCarBottom = newCar.offsetTop+newCar.offsetHeight - 65;
+		// console.log(newCarBottom)
+
+		if(carTop < newCarBottom && carRight > newCarLeft && carLeft < newCarRight && carBottom > newCarTop){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	//随机数
+	function rand(min,max){
+		return parseInt(Math.random()*(max - min) + 1) + min;
+	}
+
+</script>
+</html>

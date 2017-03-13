@@ -1,0 +1,22 @@
+1.需求:做小鸟的运动，小鸟向下运动加速运动，向上运动是减速运动
+2.如果做运动，必然用到计时器（bird.move = setInterval）
+3.每次运动，在原基础上运动的距离增加，所以有一个加速度（bird.speed）,我设定这个加速度为0.5，bird.speed的初始值为0，也就是小鸟初始是静止的
+4.	bird.speed += 0.5;
+	所以小鸟的运动是 bird.style.top = bird.offsetTop + bird.speed + "px";
+5.	为了降低游戏难度，提高用户体验，bird.speed有一个最大值，这个我设定为15
+6.	当我点击的时候小鸟变为向上运动，也就是bird.offsetTop减去一个值，那么我把bird.speed设为负值，bird.offsetTop + bird.speed的结果就为向上减速运动，所以点击后我将bird.speed=-9;
+7.给小鸟上下设定一个范围，让他不能出游戏界面
+	if(bird.offsetTop <= 0){
+		bird.style.top = 0;
+	}else if(bird.offsetTop >= big_out.offsetHeight - bird.offsetHeight - 57){
+		bird.style.top = big_out.offsetHeight - bird.offsetHeight - 57 + "px";
+		document.onclick = null;
+		clearInterval(bird.move);
+	}
+	而且小鸟掉到地上为游戏结束，关闭计时器，取消点击事件
+8.bird.speed为负值是小鸟向上运动，所以图片为up，bird.speed为正值，小鸟向下运动，图片为down，
+故			if(bird.speed <= 0){
+				bird.src = "img/up_bird0.png";
+			}else{
+				bird.src = "img/down_bird0.png";
+			}

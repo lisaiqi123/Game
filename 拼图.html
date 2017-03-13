@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+	<title>拼图</title>
+</head>
+<style type="text/css"> 
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	body{
+		position: relative;
+	}
+	.time{
+		width: 300px;
+		height: 200px;
+		font-size: 50px;
+		line-height: 200px;
+		text-align: center;
+		position: absolute;
+		top: 20px;
+		left: 800px;
+		background: #e0fab2;
+	}
+	ul,li{
+		list-style: none;
+	}
+	ul{
+		width: 600px;
+		height: 600px;
+		background-color: #999999;
+		position: absolute;
+		top: 20px;
+		left: 200px;
+	}
+	li{
+		width: 193px;
+		height: 193px;
+		position: absolute;
+		background-color: #fff;
+		padding: 3px;
+		box-sizing: border-box;
+		overflow: hidden;
+	}
+	img{
+		position: absolute;
+		width: 187px;
+		height: 187px;
+	}
+	#btn{
+		position: absolute;
+		top: 0;
+		left: 200px;
+	}
+</style>
+<body>
+<script type="text/javascript"> 
+var zIndex = 1;
+window.onload = function(){
+	var ul = document.querySelector("ul");
+	var timer = null;
+	
+	var arr = [{left: "5px",top: "5px"},
+				{left: "203px",top: "5px"},
+				{left: "402px",top: "5px"},
+				{left: "5px",top: "203px"},
+				{left: "203px",top: "203px"},
+				{left: "402px",top: "203px"},
+				{left: "5px",top: "402px"},
+				{left: "203px",top: "402px"},
+				{left: "402px",top: "402px"}];
+	//创建Li
+	function createLi(){
+		for(var i = 0; i < 9; i++){
+			var li = document.createElement("li");
+			var img = new Image();
+			img.src = "images/"+(i+1)+".png";
+			li.appendChild(img);
+			li.style.top = arr[i].top;
+			li.style.left = arr[i].left;
+			ul.appendChild(li);
+		}
+	}
+	createLi();
+
+	var lis = document.querySelectorAll("li");
+	//随机函数
+	function rand(){
+		return parseInt(Math.random()*9);
+	}
+
+	//重新换顺序
+	function changeNum(){
+		var arrNum = new Array();
+		var i = 0;
+		while(arrNum.length < 9){
+			var num = rand();
+			var bol = true;
+			for(var j = 0; j < arrNum.length; j++) {
+				if(arrNum[j] == num) {
+					bol = false;
+				}
+			}
+			if(bol == true) {
+				arrNum.push(num);
+			}
+			i = arrNum.length;
+			
+		}
+		return arrNum;
+	}	
+
+	function changeLi(){
+		//获取重新排列的数组
+		var a = changeNum();
+		console.log(a);
+		for(var i = 0; i < lis.length; i++){
+			lis[a[i]].style.left = arr[i].left;
+			lis[a[i]].style.top = arr[i].top;
+			game(lis[i]);
+		}
+	}
+	
+
+	function game(obj){
+		obj.onmousedown = function (event)
+		{
+			console.log(obj.innerHTML)
+			window.a = this.offsetLeft;
+			window.b = this.offsetTop;
+			var event = event || window.event;
+			var disX = event.clientX - this.offsetLeft;
+			var disY = event.clientY - this.offsetTop;
+			var oNear = null;
+			obj.style.zIndex = zIndex++;
+			obj.style.backgroundColor = "red";
+			document.onmousemove = function (event)
+			{
+				var event = event || window.event;			
+				var iL = event.clientX - disX;
+				var iT = event.clientY - disY;
+				var maxL = obj.parentNode.clientWidth - obj.offsetWidth;
+				var maxT = obj.parentNode.clientHeight - obj.offsetHeight;			
+	
+				iL < 0 && (iL = 0);
+				iT < 0 && (iT = 0);
+				iL > maxL && (iL = maxL);
+				iT > maxT && (iT = maxT);			
+				obj.style.left = iL + "px";
+				obj.style.top = iT + "px";				
+				
+				oNear = findNearest(obj);
+				oNear.style.backgroundColor = "yellow";
+			};		
+			document.onmouseup = function ()
+			{
+				obj.style.backgroundColor = "#fff";
+				document.onmousemove = null;
+				document.onmouseup = null;
+				for(var k = 0; k < lis.length; k++){
+					lis[k].style.backgroundColor = "#fff";
+				}
+				//将元素与找到的最近的元素交换位置
+				if(oNear){
+					obj.style.left = oNear.offsetLeft + "px";
+					obj.style.top = oNear.offsetTop + "px";
+					oNear.style.left = a + "px";
+					oNear.style.top = b + "px";
+					isfinish();
+				}
+			};
+		}
+	}
+
+	//找出相遇点中最近的元素
+		function findNearest(obj)
+		{
+			var filterLi = [];
+			var aDistance = [];
+			
+			for (i = 0; i < lis.length; i++){
+				if(lis[i] != obj){
+					isButt(obj, lis[i]);
+					aDistance.push(getDistance(obj, lis[i]));
+					filterLi.push(lis[i]);
+				}
+			}
+			var minNum = Number.MAX_VALUE;
+			var minLi = null;
+			
+			for (i = 0; i < aDistance.length; i++){
+				if(aDistance[i] < minNum){
+					minNum = aDistance[i];
+					minLi = filterLi[i];
+				}
+			}
+				console.log("minLi"+minLi.innerHTML);
+			return minLi;
+		}		
+
+		//求两点之间的距离
+		function getDistance(obj1, obj2)
+		{
+			var a = (obj1.offsetLeft + obj1.offsetWidth / 2) - (obj2.offsetLeft + obj2.offsetWidth / 2);
+			var b = (obj1.offsetTop + obj1.offsetHeight / 2) - (obj2.offsetTop + obj2.offsetHeight / 2);
+			return Math.sqrt(a * a + b * b)
+		}
+		//碰撞检测
+		function isButt(obj1, obj2)
+		{
+			var l1 = obj1.offsetLeft;
+			var t1 = obj1.offsetTop;
+			var r1 = obj1.offsetLeft + obj1.offsetWidth;
+			var b1 = obj1.offsetTop + obj1.offsetHeight;
+			
+			var l2 = obj2.offsetLeft;
+			var t2 = obj2.offsetTop;
+			var r2 = obj2.offsetLeft + obj2.offsetWidth;
+			var b2 = obj2.offsetTop + obj2.offsetHeight;
+			
+			return !(r1 < l2 || b1 < t2 || r2 < l1 || b2 < t1)
+		}
+
+		function isfinish(){
+			var arrL = [];
+			var arrT = [];
+			for(var i = 0; i < lis.length; i++){
+				arrL.push(lis[i].offsetLeft);
+				arrT.push(lis[i].offsetTop);
+				
+			}
+			console.log("arrL"+arrL)
+			console.log("arrT"+arrT)
+			if((arrT[0] == 5 && arrT[1] == 5 && arrT[2] == 5 && arrT[3] == 203 &&arrT[4] == 203 &&arrT[5] == 203 && arrT[6] == 402 && arrT[7] == 402 && arrT[8] == 402) && (arrL[0] == 5 && arrL[3] == 5 && arrL[6] == 5 && arrL[1] == 203 &&arrL[4] == 203 &&arrL[7] == 203 && arrL[2] == 402 && arrL[5] == 402 && arrL[8] == 402)){
+				
+					clearInterval(timer);
+					alert("用时"+s+"秒，恭喜您通关");
+					document.onmousedown = null;
+					document.onmousemove = null;
+					document.onmouseup = null;
+			}
+		}
+
+	var btn = document.querySelector("#btn");
+	var time = document.querySelector(".time p");
+	btn.onclick = function(){
+		changeLi();
+		window.s = 0;
+		timer = setInterval(function(){
+			s++;
+			time.innerHTML = "计时：" + s;
+		},1000);
+	}
+	//阻止默认事件
+	document.onmousedown = function(e){
+		var ev = e || event;
+		ev.preventDefault();
+	}
+
+}
+</script>
+	<input type="button" value="重新开始" id="btn" name="">
+	<div class="time">
+		<p>计时：</p>
+	</div>
+	<ul>
+	</ul>
+</body>
+</html>

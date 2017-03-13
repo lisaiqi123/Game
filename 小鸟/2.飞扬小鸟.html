@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style type="text/css">
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    #fbWrap{
+        width: 350px;
+        height: 480px;
+        background: url("img/bg.jpg");
+        background-size: 100% 100%;
+        position: relative;
+        overflow: hidden;
+        margin: 0 auto;
+    }
+    #head{
+        position: absolute;
+        left: 50px;
+        top: 150px;
+    }
+    #head span{
+        background: url("img/bird0.png");
+        position: absolute;
+        right: 0;
+        top: 20px;
+        width: 40px;
+        height: 26px;
+        background-size: 100% 100%;
+    }
+    #scoring{
+        position: absolute;
+        left: 50%;
+        top: 20px;
+        z-index: 2;
+        font-size:  50px;
+    }
+    #menu{
+        position: absolute;
+        left: 40%;
+        top: 55%;
+    }
+    #bird{
+        position: absolute;
+        left: 30px;
+        top: 10%;
+        display: none;
+        z-index: 10;
+    }
+    .die{
+        transition: 0.5s;
+        top: 393px;
+        z-index: 99;
+    }
+    #ductWrap li{
+        position: absolute;
+        top: 0;
+        width: 62px;
+        height: 423px;
+        list-style: none;
+    }
+    .duct_up{
+        background: url("img/up_mod.png") repeat-y;
+        height: 120px;
+        position: relative;
+    }
+    .duct_up img{
+        position: absolute;
+        bottom: 0;
+    }
+    .duct_down{
+        background: url("img/down_mod.png") repeat-y;
+        height: 203px;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+    }
+    .duct_down img{
+        position: absolute;
+        top: 0;
+    }
+    .slideOutUp{
+    	animation-iteration-count: infinite;
+    	animation-direction: alternate;
+    }
+    </style>
+    <link rel="stylesheet" type="text/css" href="animate.css"/>
+</head>
+<body>
+<audio autoplay="autoplay"  preload="auto"
+            src="game_music.mp3">
+      你的浏览器不支持audio标签
+</audio>
+    <div id="fbWrap">
+        <div id="head" class="animated slideOutUp">
+            <img src="img/head.jpg" alt="">
+            <span></span>
+        </div>
+        <div id="scoring">
+            0
+        </div>
+        <div id="menu">
+            <img id="start" src="img/start.jpg" alt="">
+        </div>
+        <div id="bird">
+            <img src="img/down_bird0.png" alt="">
+        </div>
+        <ul id="ductWrap"></ul>
+    </div>
+</body>
+<script type="text/javascript">
+	//获取开始按钮
+	var startBtn = document.querySelector("#start");
+	//获取head
+	var headDiv = document.querySelector("#head");
+	//获取小鸟
+	var bird = document.querySelector("#bird");
+	//获取音频audio
+	var audio = document.querySelector("audio");
+	//获取存放管道的ul
+	var ductWrap = document.querySelector("#ductWrap");
+	//创建管道定时器
+	var creatDuctTimer = null;
+	//用来清除管道移动的bol
+	var ductIsMove = true;
+	//给开始按钮添加点击事件
+	startBtn.onclick = function(){
+		headDiv.style.display = "none";
+		startBtn.style.display = "none";
+		bird.style.display = "block";
+		//给小鸟添加一个速度
+		bird.speed = 0;
+		//给小鸟添加定时器,让小鸟降落
+		bird.moveTimer = setInterval(function(){
+			//每次降落速度为0.5px
+			bird.speed+=0.5;
+			//重新赋值给bird的top值
+			bird.style.top = bird.offsetTop + bird.speed + "px";
+			//判断小鸟上升或下降
+			if(bird.speed > 0){
+				bird.children[0].src = "img/down_bird0.png";
+			}else{
+				bird.children[0].src = "img/up_bird0.png";
+			}
+			//判断小鸟是否移开屏幕
+			if(bird.offsetTop <= 0){
+				bird.style.top = "0px";
+			}else if(bird.offsetTop >= 390){
+				//清除小鸟移动定时器
+				clearInterval(bird.moveTimer);
+				//更换音乐
+				audio.src = "game_over.mp3";
+				//清除管道定时器
+				clearInterval(creatDuctTimer);
+				//清除管道移动定时器
+				ductIsMove = false;	
+			}
+			//小鸟每次移动都要去判断是否碰撞管道
+			var ducts = document.querySelectorAll(".duct");
+			for(var i = 0; i < ducts.length; i++){
+				//碰撞检测
+				var isCollide = collideFn(bird,ducts[i]);
+				if(isCollide){
+					//清除小鸟移动
+					clearInterval(bird.moveTimer);
+					//清除管道创建
+					clearInterval(creatDuctTimer);
+					//清除管道移动
+					ductIsMove = false;
+					//更换音乐
+					audio.src = "game_over.mp3";
+					bird.style.top = "390px";
+					bird.style.transition = "1s";
+				}
+			}
+		},30)
+		//让小鸟上升
+		document.onmousedown = function(e){
+			var ev = window.event || e;
+			ev.preventDefault();
+			//改变小鸟的速度
+			bird.speed = -6;
+			//更换音乐
+			audio.src = "bullet.mp3";
+		}
+		
+		//创建管道
+		creatDuctTimer = setInterval(function(){
+			var duct = document.createElement("li");
+			//随机上边管道高度
+			var upHeight = randFn(62,261);
+			//管道出现的位置
+			duct.l = 350;
+			duct.style.left = duct.l + "px";
+			//给管道设置内容
+			duct.innerHTML = '<div class="duct_up duct" style="height: '+ upHeight +'px"><img src="img/up_pipe.png" alt=""></div><div class="duct_down duct" style="height: '+(420 - 100 - upHeight)+'px"><img src="img/down_pipe.png" alt=""></div>';
+			//插入管道
+			ductWrap.appendChild(duct);
+			duct.scoreBol = true;
+			//存放分数的div
+			var scoreDiv = document.querySelector("#scoring");
+			//管道移动
+			duct.moveTimer = setInterval(function(){
+				duct.l -= 2;
+				duct.style.left = duct.l + "px";
+				//判断管道移动定时器是否清除
+				if(ductIsMove == false){
+					clearInterval(duct.moveTimer);
+				}
+				if(duct.l <= -62){
+					//删除管道
+					ductWrap.removeChild(duct);
+					//清除管道移动的定时器
+					clearInterval(duct.moveTimer);
+				}else if(duct.l <= -31){
+					if(duct.scoreBol == true){
+						var num = Number(scoring.innerHTML);
+						num+=10;
+						scoreDiv.innerHTML = num;
+						duct.scoreBol = false;
+					}
+				}
+			},30)
+		},3000)
+	}
+	function randFn(min,max){
+		return parseInt(Math.random() * (max - min + 1) + min);
+	}
+	
+	//碰撞检测
+	function collideFn(bird,duct){
+		var birdLeft = bird.offsetLeft;
+		var birdRight = birdLeft + bird.offsetWidth;
+		var birdTop = bird.offsetTop; 
+		var birdBottom = birdTop + bird.offsetHeight;
+		
+		var ductLeft = duct.parentNode.offsetLeft;
+		var ductRight = ductLeft + duct.offsetWidth;
+		var ductTop = duct.offsetTop;
+		var ductBottom = ductTop + duct.offsetHeight;
+		
+		if(birdLeft <= ductRight && birdRight >= ductLeft && birdTop <= ductBottom && birdBottom >= ductTop){
+			return true;
+		}else{
+			return false;
+		}
+	}
+</script>
+</html>

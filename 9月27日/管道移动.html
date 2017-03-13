@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<style type="text/css">
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	.big_out{
+		width: 343px;
+		height: 480px;
+		background: url(img/bg.jpg) 0 0 no-repeat;
+		overflow: hidden;
+	}
+	.out{
+		width: 60px;
+		height: 424px;
+		position: relative;
+	}
+	.duct_up{
+		width: 60px;
+		height: 100px;
+		background: url(img/up_mod.png) 0 0 repeat-y;
+		position: absolute;
+		top: 0;
+	}
+	.duct_down{
+		width: 60px;
+		height: 224px;
+		background: url(img/down_mod.png) 0 0 repeat-y;
+		position: absolute;
+		bottom: 0;
+	}
+	ul,li{
+		list-style: none;
+	}
+	ul li{
+		position: absolute;
+		height: 424px;
+		width: 62px;
+		left: 343px;
+	}
+</style>
+<body>
+	<div class="big_out">
+		<ul class="out">
+			<!-- <li>
+				<div class="duct_up">
+					<img style="position: absolute;bottom: 0;" src="img/up_pipe.png"/>
+				</div>
+				<div class="duct_down">
+					<img src="img/down_pipe.png"/>
+				</div>
+			</li> -->
+		</ul>
+	</div>
+	<script type="text/javascript">
+		var ul = document.querySelector("ul");
+		//创建一个分数的初始值
+		var num = 0;
+		//每个3秒创建一组管道li的计时器
+		var creatDuct = setInterval(function(){
+			//创建一个li，也就是管道的外边框
+			var duct = document.createElement("li");
+			//管道运动的初始值，li的初始left值，刚好是游戏屏幕的宽度
+			duct.l = 343;
+			//控制加分的布尔值(开关)
+			duct.bol = true;
+			//上管道的随机高度
+			duct.Height = randFn(61,264);
+			//给li添加管道内容，并且将随机的上管道高度赋值，通过总高度-上管道高度-缝隙的高度，得到下管道的高度，并赋值
+			duct.innerHTML = '<div class="duct_up" style="height:'+ duct.Height +'px;"><img style="position: absolute;bottom: 0;" src="img/up_pipe.png"/></div><div class="duct_down" style="height:'+ (324 - duct.Height) +'px;"><img src="img/down_pipe.png"/></div>';
+			//将管道li推入ul中
+				ul.appendChild(duct);
+				//管道运动的计时器
+				duct.move = setInterval(function(){
+					//每个30毫秒li的left值减2
+					duct.l-=2;
+					//当管道刚好走出游戏区域，将其移除。并清掉管道移动的计时器
+					if(duct.l <= -62){
+						clearInterval(duct.move);
+						ul.removeChild(duct);
+					}else if(duct.l <= -30){
+						//当管道刚好过小鸟时，加一分，加一分后duct.bol变成false，让后面满足条件的left值不再加分
+						if(duct.bol){
+							num++;
+							console.log(num);
+							duct.bol = false;
+						}
+						
+						
+					}
+					//给管道的left值赋值，随着计时器改变left值，管道在移动
+					duct.style.left = duct.l + "px";
+				},30)
+			
+		},3000)
+		function randFn(min,max){
+			return parseInt(Math.random()*(max-min)+1)+min;
+		}
+
+
+
+
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>九宫格改善</title>
+</head>
+<style type="text/css"> 
+	*{
+		margin: 0;
+		padding: 0;
+	}
+	ul,li{
+		list-style: none;
+	}
+	ul{
+		width: 600px;
+		height: 600px;
+		border: 1px solid red;
+		margin: 0 auto;
+		position: relative;
+		top: 30px;
+		background-color: #999999;
+	}
+	li{
+		width: 193px;
+		height: 193px;
+		float: left;
+		position: absolute;
+		margin: 4px;
+		font-size: 100px;
+		text-align: center;
+		line-height: 193px;
+		background-color: #ccc;
+	}
+	#btn{
+		width: 70px;
+		height: 20px;
+		position: absolute;
+		top: 0px;
+		left: 650px;
+	}
+</style>
+<body>
+	<input type="button" value="开始" id="btn" name="">
+	<ul>
+	</ul>
+</body>
+<script type="text/javascript">
+	var ul = document.querySelector("ul");
+	var arr = [{left: "3px",top: "3px"},
+					{left: "199px",top: "3px"},
+					{left: "395px",top: "3px"},
+					{left: "3px",top: "199px"},
+					{left: "199px",top: "199px"},
+					{left: "395px",top: "199px"},
+					{left: "3px",top: "395px"},
+					{left: "199px",top: "395px"},
+					{left: "395px",top: "395px"}];
+	//对ul中的li进行定位
+	for(var i = 0; i < arr.length; i++){
+		var li = document.createElement("li");
+		li.innerHTML = i+1;
+		li.style.left = arr[i].left;
+		li.style.top = arr[i].top;
+		ul.appendChild(li);
+		if(i==8){
+			li.style.display = "none";
+		}
+	}
+
+	//随机函数
+	function rand(){
+		return parseInt(Math.random()*8)+1;
+	}
+	//形成新数组函数
+	function changeNum(){
+		var i = 0;
+		var newArray = new Array();
+		while(newArray.length < 8) {
+			//获取随机数num
+			var num = rand();
+			var bool = true;
+			for(var j = 0; j < newArray.length; j++) {
+				if(newArray[j] == num) {
+					bool = false;
+				}
+			}
+			if(bool == true) {
+				newArray.push(num);
+			}
+			i = newArray.length;
+		}
+		console.log("新数组：" + newArray);
+		return newArray;
+	}	
+
+	function changeLi(){
+		//获取重新排列的数组
+		var lis = document.querySelectorAll("li");
+		var a = changeNum();
+		for(var i = 0; i < 8; i++){
+			lis[i].innerHTML = a[i];
+		}
+		return a;
+	}
+
+	//点击某项li
+	function clickLi(){
+		var lis = document.querySelectorAll("li");
+		for(var k = 0; k < lis.length; k++){
+			lis[k].index = k;
+			lis[k].onmouseover = function(){
+				for(var i = 0; i < 8; i++){
+					lis[i].style.backgroundColor = "#ccc";
+				}
+				this.style.backgroundColor = "rgba(255,0,0,0.3)";
+			}
+			lis[k].onmouseout = function(){
+				for(var i = 0; i < 8; i++){
+					lis[i].style.backgroundColor = "#ccc";
+				}
+			}
+			lis[k].onclick = function(){
+				if(Math.abs(this.index-mubiao)==1||Math.abs(this.index-mubiao)==3){
+					console.log("mubiao"+mubiao);
+
+					console.log("this.index"+this.index);
+					lis[this.index].style.display = "none";
+					lis[mubiao].style.display = "block";
+					//单独对下标为8的li进行样式的设置
+					if(mubiao==8){
+						lis[mubiao].onmouseover = function(){
+							this.style.backgroundColor = "rgba(255,0,0,0.3)";
+						}
+						lis[mubiao].onmouseout = function(){
+							this.style.backgroundColor = "#ccc";
+						}
+					}
+					lis[mubiao].innerHTML = lis[this.index].innerHTML;
+					mubiao = this.index;
+				}
+				//判断是否完成
+				if(isOver()){
+					alert("恭喜你通关！");
+				}
+			}
+		}
+	}
+
+	//判断九宫格是否完成
+	function isOver(){
+		var lis = document.querySelectorAll("li");
+		for(var i = 1; i < lis.length; i++){
+            if(lis[i].innerHTML != (i+1)){
+                return false;
+            }
+        }
+        return true;
+	}
+	//开始游戏
+	btn.onclick = function(){
+		changeLi();
+		clickLi();
+		//将mubiao设置为全局
+		mubiao = 8;
+	}
+</script>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<input type="button" value="点击" />
+	<audio src="game_music.mp3" autoplay="autoplay"></audio>
+	<script type="text/javascript">
+		var btn = document.querySelector("input");
+		var audio = document.querySelector("audio");
+		btn.onclick = function(){
+			audio.src = "bullet.mp3";
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset = "utf-8">
+	<title>碰撞检测</title>
+</head>
+<style type="text/css">
+	*{
+		margin: 0;
+		padding: 0;
+	} 
+	ul,li{
+		list-style: none;
+	}
+	.out{
+		width: 343px;
+		height: 480px;
+		border: 1px solid red;
+		position: relative;
+		margin: 0 auto;
+		overflow: hidden;
+	}
+	.juan{
+		width: 3000px;
+		height: 480px;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	.juan img{
+		float: left;
+	}
+	.bird{
+		display: block;
+		position: absolute;
+		cursor: pointer;
+		left: 40px;
+		top: 220px;
+		display: none;
+		z-index: 2;
+	}
+	ul{
+		position: absolute;
+	}
+	ul li{
+		height: 480px;
+		width: 62px;
+		position: absolute;
+		left:343px;
+		top:0;
+	}
+	#duct1{
+		width: 62px;
+		position: absolute;
+		font-size: 18px;
+		background: url(img/up_mod.png) repeat-y 0 0;
+		top: 0;
+		left: 0;
+	}
+	.img1{
+		width: 62px;
+		height: 60px;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+	}
+	#duct2{
+		width: 62px;
+		position: absolute;
+		bottom: 57px;
+		left: 0;
+		font-size: 18px;
+		background: url(img/down_mod.png) repeat-y 0 0;
+	}
+	.img2{
+		width: 62px;
+		height: 60px;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	p{
+		font-size: 30px;
+		position: absolute;
+		width: 343px;
+		height: 50px;
+		line-height: 50px;
+		color: black;
+		top: 20px;
+		left: 30px;
+		display: none;
+	}
+	.menu{
+		width: 343px;
+		height: 150px;
+		position: absolute;
+		top: 150px;
+		left: 0px;
+	}
+	.head{
+		position: absolute;
+		left: 85px;
+	}
+	.start{
+		position: absolute;
+		top: 100px;
+		left: 130px;
+	}
+	.game_over{
+		width: 269px;
+		height: 185px;
+		background: url(img/message.jpg) no-repeat 0 bottom;
+		position: absolute;
+		top: 130px;
+		left: 40px;
+		display: none;
+	}
+	.pic_over{
+		position: absolute;
+		left: 27px;
+	}
+	.end{
+		position: absolute;
+		top: 80px;
+		left: 150px;
+	}
+</style>
+<body>
+	<div class="out">
+		<div class="juan">
+			<img src="img/bg.jpg" class="bgImg" />
+			<img src="img/bg.jpg" />
+		</div>
+		<img src="img/bird0.png" class="bird" />
+		<ul> 
+		</ul>
+		<p>得分：0</p>
+		<div class="menu"> 
+			<img src="img/head.jpg" class="head"/>
+			<img src="img/start.jpg" class="start"/>
+		</div>
+		<audio src="game_music.mp3" autoplay></audio>
+		<div class="game_over"> 
+			<img src="img/game_over.jpg" class="pic_over"/>
+			<h2 class="end">0</h2>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+	window.onload = function(){
+		var out = document.querySelector(".out");
+		var audio = document.querySelector("audio");
+		var p = document.querySelector("p");
+		var bird = document.querySelector(".bird");
+		var ul = document.querySelector("ul");
+		var bgImg = document.querySelector(".bgImg");
+		var juan = document.querySelector(".juan");
+		var menu = document.querySelector(".menu");
+		var start = document.querySelector(".start");
+		var game_over = document.querySelector(".game_over");
+		var end = document.querySelector(".end");
+		//用来清除管道移动的bol
+		var ductIsMove = true;
+
+		start.onclick = function(){
+			bird.style.display = "block";
+			p.style.display = "block";
+			menu.style.display = "none";
+			audio.src = "bullet.mp3";
+			//计时器实现背景滚动
+			var i = 0;
+			juan.bgTimer = setInterval(function(){
+				i++;
+				if(i > bgImg.offsetWidth){
+					i = 0;
+				}
+				juan.style.left = -i + "px";
+			},15);
+
+			//鸟飞
+			var speed = 0;
+			bird.flyTimer = setInterval(function (){
+				speed = speed + 0.5;
+				//利用加速度的正负判断小鸟是上升还是下降
+				if(speed > 0){
+					bird.src = "img/down_bird0.png";
+				}else if(speed < 0){
+					bird.src = "img/up_bird0.png";
+				}
+				bird.style.top = bird.offsetTop + speed + "px";
+				if(bird.offsetTop >= (out.offsetHeight - bird.offsetHeight - 57)){
+					bird.style.top = (out.offsetHeight - bird.offsetHeight - 57) + "px";
+					ductIsMove = false;
+					clearInterval(juan.bgTimer);
+					clearInterval(ductTimer);
+					out.onmousedown = null;
+					p.style.display = "none";
+					game_over.style.display = "block";
+					if(count<10){
+						var s = 0;
+					}else if(count >= 10 && count < 100){
+						s =  count/10;
+						
+					}
+					end.innerHTML = '<img src="img/0.jpg"/><img src="img/'+s+'.jpg"/><img src="img/'+(count%10)+'.jpg"/>';
+					audio.src = "game_music.mp3";
+				}else if(bird.offsetTop <= 0){
+					bird.style.top = "0px";
+				}
+			},30);
+			out.onmousedown = function(e){
+				var ev = e || event;
+				ev.preventDefault();
+				speed = -6;
+				audio.src = "bullet.mp3";
+			}
+			//让管道移动
+			var count = 0;
+			var ductTimer = setInterval(function(){
+				//创建li,往li里面推入duct1和duct2,
+				var duct1 = document.createElement("div");
+				duct1.className = "duct";
+				duct1.id = "duct1";
+				var img1 = document.createElement("img");
+				img1.className = "img1";
+				img1.src = "img/up_pipe.png";
+				var duct2 = document.createElement("div");
+				duct2.className = "duct";
+				duct2.id = "duct2";
+				var img2 = document.createElement("img");
+				img2.className = "img2";
+				img2.src = "img/down_pipe.png";
+				var li = document.createElement("li");
+				duct1.appendChild(img1);
+				li.appendChild(duct1);
+				duct2.appendChild(img2);
+				li.appendChild(duct2);
+				ul.appendChild(li);
+				console.log(ul.children);
+				//给上下管道赋高
+				var h = rand(100,250);
+				duct1.style.height = h + "px";
+				duct2.style.height = out.offsetHeight - h - 100 - 57 + "px";
+				//给管道初始位置赋值
+				li.l = out.offsetWidth;
+				//为加分设置开关条件初始值
+				li.bol = true;
+				li.timer = setInterval(function(){
+					if(ductIsMove == false){
+						clearInterval(li.timer);
+					}
+					li.l = li.l - 2;
+					li.style.left = li.l + "px";
+					if(li.l <= -li.offsetWidth){
+						ul.removeChild(li);
+						clearInterval(li.timer);
+					}
+					if(bird.offsetLeft  > li.offsetLeft + li.offsetWidth){
+						//给加分设置开关
+						if(li.bol){
+							count++;
+							li.bol = false;
+							p.innerHTML = "得分：" + count;
+						}
+					}
+					//获取所有的管道，判断小鸟跟所有的管道（分别为上下管道）的碰撞
+					var duct = document.querySelectorAll(".duct");
+					for(var i = 0; i < duct.length; i++){
+						//调用碰撞条件
+						var ind = check(bird,duct[i]);
+						if(ind){
+							ductIsMove = false;
+							clearInterval(juan.bgTimer);
+							clearInterval(ductTimer);
+							audio.src = "game_over.mp3";
+							speed = 0;
+							out.onmousedown = null;
+						}
+					}
+				},20);
+			},3000);
+			//封装碰撞条件
+			function check(bird,duct){
+				console.log("check");
+				var birdTop = bird.offsetTop;
+				var birdLeft = bird.offsetLeft;
+				var birdRight = bird.offsetLeft + bird.offsetWidth;
+				var birdBottom = bird.offsetTop + bird.offsetHeight;
+				var ductTop = duct.offsetTop;
+				var ductLeft = duct.parentNode.offsetLeft;
+				var ductRight = duct.parentNode.offsetLeft + duct.offsetWidth;
+				var ductBottom = duct.offsetTop + duct.offsetHeight;
+
+				if(birdTop < ductBottom && birdRight > ductLeft && birdLeft < ductRight && birdBottom > ductTop){
+					console.log(1)
+					return true;
+				}else{
+					return false;
+				}
+			}
+		}
+
+		//分数转化成图片
+		function changeCount(num){
+			var s = num%10;
+			var m = num/10;
+			
+		}
+		//随机数
+		function rand(min,max){
+			return parseInt(Math.random()*(max - min) + 1) + min;
+		}
+	}
+
+</script>
+</html>
